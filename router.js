@@ -68,7 +68,7 @@ router.options(DEFAULT_PATH, (req, res, next) => {
 
 router.get(DEFAULT_PATH, (req, res, next) => {
   let url = getProxyUrl(req)
-  if (url == false) {
+  if (url === false) {
     res.json({
       Code: 0,
       Message: 'fail'
