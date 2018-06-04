@@ -31,7 +31,7 @@ LoggerLog(`default proxy path: ${DEFAULT_PATH}`, 'log')
 const DEFAULT_PROXY_PARAMETER = 'proxy_url'
 
 function getProxyUrl (req) {
-  return req.headers[DEFAULT_PROXY_PARAMETER]
+  return req.headers[DEFAULT_PROXY_PARAMETER] || false
 }
 function getHeaderToken (req) {
   return req.headers['token']
@@ -51,7 +51,9 @@ function setDefaultCorsHeader (req, res, next) {
   res.setHeader('access-control-allow-credentials', true)
   res.setHeader('access-control-allow-methods', 'GET,POST,OPTIONS')
   res.setHeader('access-control-allow-headers', ALLOW_HEADERS.join(','))
-  res.setHeader('access-control-allow-origin', req.headers['origin'])
+  if (req.headers['origin']) {
+    res.setHeader('access-control-allow-origin', req.headers['origin'])
+  }
 
   next()
 }
@@ -66,6 +68,13 @@ router.options(DEFAULT_PATH, (req, res, next) => {
 
 router.get(DEFAULT_PATH, (req, res, next) => {
   let url = getProxyUrl(req)
+  if (url == false) {
+    res.json({
+      Code: 0,
+      Message: 'fail'
+    })
+    return
+  }
   let token = getHeaderToken(req)
   LoggerLog(req.query)
 
@@ -75,6 +84,7 @@ router.get(DEFAULT_PATH, (req, res, next) => {
   }).catch(err => {
     console.log('ERROR ON GET:')
     LoggerLog('ERROR ON GET:')
+    console.log(err)
 
     res.json({
       Code: 0,
@@ -85,6 +95,13 @@ router.get(DEFAULT_PATH, (req, res, next) => {
 
 router.post(DEFAULT_PATH, (req, res, next) => {
   let url = getProxyUrl(req)
+  if (url == false) {
+    res.json({
+      Code: 0,
+      Message: 'fail'
+    })
+    return
+  }
   let token = getHeaderToken(req)
   LoggerLog('POST: ' + url)
 
